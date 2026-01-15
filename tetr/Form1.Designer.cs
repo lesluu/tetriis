@@ -16,7 +16,7 @@ partial class Form1
 
     #region Windows Form Designer generated code
 
-   
+
     private void InitializeComponent()
     {
         this.components = new System.ComponentModel.Container();

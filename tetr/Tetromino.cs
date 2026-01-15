@@ -11,24 +11,24 @@ public class Tetromino
 
     private static readonly int[][,] TetrominoShapes = new int[][,]
     {
-        new int[,] { {1,1,1,1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0} },  
-        new int[,] { {1,1,0}, {0,1,1}, {0,0,0} },                    
-        new int[,] { {0,1,1}, {1,1,0}, {0,0,0} },                    
-        new int[,] { {1,1,1}, {0,0,1}, {0,0,0} },                    
-        new int[,] { {1,1,1}, {1,0,0}, {0,0,0} },                    
-        new int[,] { {1,1}, {1,1} },                                 
-        new int[,] { {1,1,1}, {0,1,0}, {0,0,0} }                     
+        new int[,] { {1,1,1,1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0} },
+        new int[,] { {1,1,0}, {0,1,1}, {0,0,0} },
+        new int[,] { {0,1,1}, {1,1,0}, {0,0,0} },
+        new int[,] { {1,1,1}, {0,0,1}, {0,0,0} },
+        new int[,] { {1,1,1}, {1,0,0}, {0,0,0} },
+        new int[,] { {1,1}, {1,1} },
+        new int[,] { {1,1,1}, {0,1,0}, {0,0,0} }
     };
 
     private static readonly Color[] TetrominoColors =
     {
-        Color.Cyan,   
-        Color.Red,     
-        Color.Green,   
-        Color.Orange,  
-        Color.Blue,    
-        Color.Yellow,  
-        Color.Purple   
+        Color.Cyan,
+        Color.Red,
+        Color.Green,
+        Color.Orange,
+        Color.Blue,
+        Color.Yellow,
+        Color.Purple
     };
 
     public Tetromino(int type)

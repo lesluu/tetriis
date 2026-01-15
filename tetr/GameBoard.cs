@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 
 namespace Tetris;
 
@@ -11,25 +12,64 @@ public class GameBoard
     public bool GameOver { get; private set; }
     public Tetromino CurrentPiece { get; private set; } = null!;
     public Tetromino NextPiece { get; private set; } = null!;
+    public Tetromino? HoldPiece { get; private set; }
     private readonly Random random = new();
+    private bool canHold = true; 
+    private const string HighScoreFile = "highscore.txt";
 
     public const int Width = 10;
     public const int Height = 20;
+
+    public int TotalHardDrops { get; private set; }
+    public int LastHardDropDistance { get; private set; }
 
     public GameBoard()
     {
         Board = new int[Height, Width];
         Score = 0;
-        HighScore = 0;
+        HighScore = LoadHighScore();
         GameOver = false;
         NextPiece = new Tetromino(random.Next(7));
         SpawnNewPiece();
+    }
+
+    private int LoadHighScore()
+    {
+        try
+        {
+            if (File.Exists(HighScoreFile))
+            {
+                string content = File.ReadAllText(HighScoreFile);
+                if (int.TryParse(content, out int highScore))
+                {
+                    return highScore;
+                }
+            }
+        }
+        catch (Exception)
+        {
+
+        }
+        return 0;
+    }
+
+    private void SaveHighScore()
+    {
+        try
+        {
+            File.WriteAllText(HighScoreFile, HighScore.ToString());
+        }
+        catch (Exception)
+        {
+            
+        }
     }
 
     public void SpawnNewPiece()
     {
         CurrentPiece = NextPiece;
         NextPiece = new Tetromino(random.Next(7));
+        canHold = true; 
         if (IsCollision())
         {
             GameOver = true;
@@ -70,6 +110,94 @@ public class GameBoard
             return false;
         }
         return true;
+    }
+
+    
+    public bool Hold()
+    {
+        if (!canHold || GameOver) return false;
+
+        if (HoldPiece == null)
+        {
+            HoldPiece = CurrentPiece;
+            HoldPiece.Position = new Point(3, 0);
+            SpawnNewPiece();
+        }
+        else
+        {
+            var temp = HoldPiece;
+            HoldPiece = CurrentPiece;
+            HoldPiece.Position = new Point(3, 0);
+            CurrentPiece = temp;
+            CurrentPiece.Position = new Point(3, 0);
+
+            if (IsCollision())
+            {
+                CurrentPiece = HoldPiece;
+                HoldPiece = temp;
+                HoldPiece.Position = new Point(3, 0);
+                return false;
+            }
+        }
+
+        canHold = false; 
+        return true;
+    }
+
+    public int HardDrop()
+    {
+        if (GameOver) return 0;
+
+        int distance = 0;
+
+        while (MoveDown())
+        {
+            distance++;
+        }
+
+        if (distance > 0)
+        {
+            int bonus = distance * 2; 
+            Score += bonus;
+
+            TotalHardDrops++;
+            LastHardDropDistance = distance;
+
+            if (Score > HighScore)
+            {
+                HighScore = Score;
+                SaveHighScore();
+            }
+        }
+
+        return distance;
+    }
+
+    public bool SoftDrop()
+    {
+        if (GameOver) return false;
+
+        CurrentPiece.MoveDown();
+        if (IsCollision())
+        {
+            CurrentPiece.Position = new Point(CurrentPiece.Position.X, CurrentPiece.Position.Y - 1);
+            MergePiece();
+            ClearLines();
+            SpawnNewPiece();
+            return false;
+        }
+        else
+        {
+            Score += 1;
+
+            if (Score > HighScore)
+            {
+                HighScore = Score;
+                SaveHighScore();
+            }
+
+            return true;
+        }
     }
 
     public void Rotate()
@@ -155,6 +283,7 @@ public class GameBoard
         if (Score > HighScore)
         {
             HighScore = Score;
+            SaveHighScore();
         }
     }
 
@@ -165,7 +294,11 @@ public class GameBoard
                 Board[i, j] = 0;
 
         Score = 0;
+        TotalHardDrops = 0;
+        LastHardDropDistance = 0;
         GameOver = false;
+        HoldPiece = null;
+        canHold = true;
 
         NextPiece = new Tetromino(random.Next(7));
         SpawnNewPiece();
